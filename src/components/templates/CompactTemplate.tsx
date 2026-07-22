@@ -15,7 +15,11 @@ export function CompactTemplate() {
     personalInfo, summary, experience, projects, education, involvement,
     skills, certifications, languages, awards, hobbies, references, sections,
   } = useCVStore();
-  const { fontFamily, primaryColor, accentColor, transformTitle, sectionGap, margin } = useTemplateTheme();
+  const { fontFamily, zoom, effectiveA4Height, lineHeight, primaryColor, accentColor, transformTitle, sectionGap, margin } = useTemplateTheme();
+
+  // Compact keeps a tighter rhythm than the other templates: 0.8x of the theme
+  // value maps "normal" (1.5) back to this template's original 1.2.
+  const compactLineHeight = lineHeight * 0.8;
 
   const visibleSections = sections.filter((s) => s.visible);
 
@@ -34,7 +38,7 @@ export function CompactTemplate() {
         return summary ? (
           <div>
             <SectionTitle title={title} />
-            <p className="text-[9px] text-gray-700 leading-[1.3]">{parseFormattedText(summary)}</p>
+            <p className="text-[9px] text-gray-700">{parseFormattedText(summary)}</p>
           </div>
         ) : null;
       case 'experience':
@@ -51,7 +55,7 @@ export function CompactTemplate() {
                   <p className="text-[8.5px] text-gray-500">{e.company}{e.location ? ` | ${e.location}` : ''}</p>
                   <ul className="mt-0.5">
                     {e.bullets.filter(Boolean).map((b, i) => (
-                      <li key={i} className="text-[9px] text-gray-700 flex leading-[1.2]">
+                      <li key={i} className="text-[9px] text-gray-700 flex">
                         <span className="mr-1 shrink-0">-</span>
                         <span>{parseFormattedText(b)}</span>
                       </li>
@@ -76,7 +80,7 @@ export function CompactTemplate() {
                   </div>
                   <ul className="mt-0.5">
                     {p.bullets.filter(Boolean).map((b, i) => (
-                      <li key={i} className="text-[9px] text-gray-700 flex leading-[1.2]">
+                      <li key={i} className="text-[9px] text-gray-700 flex">
                         <span className="mr-1 shrink-0">-</span>
                         <span>{parseFormattedText(b)}</span>
                       </li>
@@ -114,7 +118,7 @@ export function CompactTemplate() {
                   <p className="text-[8.5px] text-gray-500">{inv.institution}{inv.organization ? ` · ${inv.organization}` : ''}</p>
                   <ul className="mt-0.5">
                     {inv.bullets.filter(Boolean).map((b, i) => (
-                      <li key={i} className="text-[9px] text-gray-700 flex leading-[1.2]">
+                      <li key={i} className="text-[9px] text-gray-700 flex">
                         <span className="mr-1 shrink-0">-</span>
                         <span>{parseFormattedText(b)}</span>
                       </li>
@@ -130,7 +134,7 @@ export function CompactTemplate() {
           <div>
             <SectionTitle title={title} />
             {skills.map((cat) => (
-              <p key={cat.id} className="text-[9px] text-gray-700 leading-[1.2]">
+              <p key={cat.id} className="text-[9px] text-gray-700">
                 {cat.category && <span className="font-bold">{cat.category}: </span>}
                 {cat.items}
               </p>
@@ -177,7 +181,7 @@ export function CompactTemplate() {
         return hobbies ? (
           <div>
             <SectionTitle title={title} />
-            <p className="text-[9px] text-gray-700 leading-[1.2]">{parseFormattedText(hobbies)}</p>
+            <p className="text-[9px] text-gray-700">{parseFormattedText(hobbies)}</p>
           </div>
         ) : null;
       case 'references':
@@ -185,13 +189,19 @@ export function CompactTemplate() {
           <div>
             <SectionTitle title={title} />
             <div className="grid grid-cols-2 gap-1">
-              {references.map((r: ReferenceEntry) => (
-                <div key={r.id} className="text-[8.5px] text-gray-600">
-                  <span className="font-bold text-gray-800">{r.name}</span>
-                  {r.title && <span> — {r.title}</span>}
-                  {r.email && <span> · {r.email}</span>}
-                </div>
-              ))}
+              {references.map((r: ReferenceEntry) => {
+                const role = [r.title, r.company].filter(Boolean).join(', ');
+                const contact = [r.email, r.phone].filter(Boolean).join(' · ');
+                return (
+                  <div key={r.id} className="text-[8.5px] text-gray-600">
+                    <div>
+                      <span className="font-bold text-gray-800">{r.name}</span>
+                      {role && <span> — {role}</span>}
+                    </div>
+                    {contact && <div className="text-gray-500">{contact}</div>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : null;
@@ -217,7 +227,10 @@ export function CompactTemplate() {
       style={{
         fontFamily,
         fontSize: '9.5px',
-        lineHeight: 1.2,
+        zoom,
+        lineHeight: compactLineHeight,
+        minHeight: `${effectiveA4Height}px`,
+        ['--a4-break-height' as string]: `${effectiveA4Height}px`,
         paddingLeft: margin,
         paddingRight: margin,
         paddingTop: '20px',

@@ -3,7 +3,10 @@ import { useTemplateTheme } from '../../../hooks/useTemplateTheme';
 
 export function CompactCoverLetter() {
   const { personalInfo, coverLetterData } = useCVStore();
-  const { fontFamily, margin, accentColor } = useTemplateTheme();
+  const { fontFamily, zoom, effectiveA4Height, lineHeight, margin, accentColor } = useTemplateTheme();
+
+  // Same 0.8x density factor as CompactTemplate.
+  const compactLineHeight = lineHeight * 0.8;
 
   const contactParts: { value: string; href: string | null }[] = [
     { value: personalInfo.email || '', href: personalInfo.email ? `mailto:${personalInfo.email}` : null },
@@ -19,7 +22,10 @@ export function CompactCoverLetter() {
       style={{
         fontFamily,
         fontSize: '9.5px',
-        lineHeight: 1.2,
+        zoom,
+        lineHeight: compactLineHeight,
+        minHeight: `${effectiveA4Height}px`,
+        ['--a4-break-height' as string]: `${effectiveA4Height}px`,
         paddingLeft: margin,
         paddingRight: margin,
         paddingTop: '20px',
@@ -63,7 +69,7 @@ export function CompactCoverLetter() {
       <p className="text-[9px] text-gray-800 font-bold mb-2">{coverLetterData.greeting}</p>
 
       {/* Body */}
-      <div className="text-[9px] text-gray-700 leading-[1.3] mb-4 whitespace-pre-line">
+      <div className="text-[9px] text-gray-700 mb-4 whitespace-pre-line">
         {coverLetterData.body}
       </div>
 
